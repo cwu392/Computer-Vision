@@ -1,0 +1,562 @@
+<html>
+<head>
+<title>Computer Vision Project</title>
+<link href='http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" title="Default" href="styles/github.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>  
+
+<link rel="stylesheet" href="highlighting/styles/default.css">
+<script src="highlighting/highlight.pack.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	width: 100%;
+	font-family: 'Crimson Text', serif;
+	font-size: 20px;
+	background: #fcfcfc;
+}
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	margin: 25px 0px 0px 0px;
+	text-transform: lowercase;
+
+}
+
+h2 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 32px;
+	margin: 15px 0px 35px 0px;
+	color: #333;	
+	word-spacing: 3px;
+}
+
+h3 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 26px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h4 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 22px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+
+h5 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 18px;
+	margin: 10px 0px 10px 0px;
+	color: #111;
+	word-spacing: 2px;
+}
+
+p, li {
+	color: #444;
+}
+
+a {
+	color: #DE3737;
+}
+
+.container {
+	margin: 0px auto 0px auto;
+	width: 1160px;
+}
+
+#header {
+	background: #333;
+	width: 100%;
+}
+
+#headersub {
+	color: #ccc;
+	width: 960px;
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 20px 0px;
+}
+
+.chart {
+	width: 480px;
+}
+.lol {
+	font-size: 16px;
+	color: #888;
+	font-style: italic;
+}
+.sep {
+	height: 1px;
+	width: 100%;
+	background: #999;
+	margin: 20px 0px 20px 0px;
+}
+.footer{
+	font-size: 16px;
+}
+.latex {
+	width: 100%;
+}
+
+.latex img {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+
+pre {
+	font-family: 'Droid Sans Mono';
+	font-size: 14px;
+}
+
+table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+table td img {
+  text-align: center;
+  vertical-align: middle;
+}
+
+#contents a {
+}
+</style>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="header" >
+<div id="headersub">
+<h1>Chiamin Wu</h1>
+</div>
+</div>
+<div class="container">
+
+<h2> Project 3 / Camera Calibration and Fundamental Matrix Estimation with RANSAC</h2>
+
+<div style="float: right; padding: 20px">
+<img src="vis_arrows.jpg" width = '100%'/>
+<p style="font-size: 14px"> RANSAC Result after Normalized Fundemental Matrix</p>
+</div>
+
+<p>&emsp;&emsp;In this project, we are asked to implement 3 functions. In part I: we are using image 2D position (u,V) and camera 3D position (X,Y,Z) to calculate the camera projection matrix. In part II: we use dual image positions (u1,v1) and (u2, v2) to estimate the fundamental matrix. In part III: by using fundamental matrix from part II, we are asked to verify the goodness of RANSAC algorithm and reduce outliners. This report will be focusing on the camera principle and implementation discussion.</p>
+
+<ol>
+<li>Part I: Camera Projection Matrix</li>
+<li>Part II: Fundamental Matrix Estimation</li>
+<li>Part III: Fundamental Matrix with RANSAC</li>
+</ol>
+
+<div style="clear:both">
+<h3>Part I: Camera Projection Matrix</h3>
+
+<p>&emsp;&emsp;In Part I, we have two problems to deal with. In Part IA, we are asked to use image 2D positions (u,v) and camera 3D coordinates (X,Y,Z) to calculate the camera projection matrix M. Then, in Part IB, we can decompose this matrix m and use it to calculate our camera center f.</p>
+<div style="float: middle; padding: 30px">
+<img src="P1_F1.gif"/>
+</div>
+<p>&emsp;&emsp;From observing the function above, we can first multipy the 3x4 matrix m with camera 3D coordinates (X,Y,Z). Then, we divide the first and second row by the 3rd row and set the left part (u,v) is equal to our multiplicatoin result on the right part.</p>
+<div style="float: middle; padding: 30px">
+<img src="P1_F2.gif"/>
+</div>
+
+<div style="float: middle; padding: 30px">
+<img src="P1_F3.gif"/>
+</div>
+<p>&emsp;&emsp;Then, we can multiply u and v with their denominators and move the result to the right hand side. Under these circumstances, we can get:</p>
+
+<div style="float: middle; padding: 30px">
+<img src="P1_F4.gif"/>
+</div>
+
+<div style="float: middle; padding: 30px">
+<img src="P1_F5.gif"/>
+</div>
+<p>&emsp;&emsp;After replacing m34 to 1, we can make the following Am=0 matrix become Am=b, which can be solved by using the singular value decomposition (SVD) method or simply use A/b.</p>
+
+<div style="float: middle; padding: 30px">
+<img src="P1_F6.jpg"/>
+</div>
+<p>&emsp;&emsp;Set m34=1 and solve m by m=A\b.</p>
+<div style="float: middle; padding: 30px">
+<img src="P1_F7.png"/>
+</div>
+<p>&emsp;&emsp;In the end, we get a 11x1 matrix m. By matrix reshaping, we can shape m to a 4x3 matrix. Then transpose m, we can get the original camera projection matrix.</p>
+
+<div style="float: middle; padding: 30px">
+<img src="P1_F8.png" width='40%'/>
+</div>
+
+<h2>Part IA: Camera Projection Matrix Example Code</h2>
+<p>First, assign matrix A from image 2D positions (u,v) and camera 3D coordinates(X,Y,Z).</p>
+<pre><code>%Example code: Matrix A Element Assignment
+for i=1:m_2D_rows
+	% Assign Odd Rows from Row=1 %
+	A(2*i-1,1)=Points_3D(i,1);
+	A(2*i-1,2)=Points_3D(i,2);
+	A(2*i-1,3)=Points_3D(i,3);
+	A(2*i-1,4)=1;
+	A(2*i-1,5)=0;
+	A(2*i-1,6)=0;
+	A(2*i-1,7)=0;
+	A(2*i-1,8)=0;
+	A(2*i-1,9)=-Points_2D(i,1)*Points_3D(i,1);
+	A(2*i-1,10)=-Points_2D(i,1)*Points_3D(i,2);
+	A(2*i-1,11)=-Points_2D(i,1)*Points_3D(i,3);
+
+	% Assign Even Rows from Row=2 %
+	A(2*i,1)=0;
+	A(2*i,2)=0;
+	A(2*i,3)=0;
+	A(2*i,4)=0;
+	A(2*i,5)=Points_3D(i,1);
+	A(2*i,6)=Points_3D(i,2);
+	A(2*i,7)=Points_3D(i,3);
+	A(2*i,8)=1;
+	A(2*i,9)=-Points_2D(i,2)*Points_3D(i,1);
+	A(2*i,10)=-Points_2D(i,2)*Points_3D(i,2);
+	A(2*i,11)=-Points_2D(i,2)*Points_3D(i,3);
+end
+</code></pre>
+<p>Second, assign output matrix b from image 2D positions (u1,v1,...un,vn).</p>
+
+<pre><code>%Example code: Matrix b Element Assignment
+for i=1:m_2D_rows
+	b(2*i-1,1)=Points_2D(i,1);
+	b(2*i,1)=Points_2D(i,2);
+end
+</code></pre>
+<p>Third, solve Am=b by \, reshape and transpose m.</p>
+<pre><code>%Example code: Solve Am=b and reshape
+M=A\b;                % Solve by \ 
+M=[M;1];              % Add 1 to the last row (m34)
+M = reshape(M,[],3)'; % Transpose
+</code></pre>
+
+<h3>Part IB: Camera Center Calculation</h3>
+<p>&emsp;&emsp;In this part, we want to use the camera projection matrix m to calculate our camera center. From lecture's note, we know that the 3x4 matrix m can be separated into the multiplication of K and [R|T]. For calculating the camera center, we need to first define m is composed by a 3x3 matrix Q and a 3x1 matrix m4 as below. </p>
+
+<div style="float: middle; padding: 30px">
+<img src="P1B_F1.gif"/>
+</div>
+<p>Then, we can calculate the camera center C by multiplying -Q^-1 with m4. </p>
+
+<div style="float: middle; padding: 30px">
+<img src="P1B_F2.gif"/>
+</div>
+
+<h2>Part IB: Camera Center Calculation Example Code</h2>
+<p>First, separate 3x4 matrix m into [Q|m4].</p>
+<pre><code>%Example code: Matrix Separation
+Q=M(1:3,1:3);
+m4=M(1:3,4);
+</code></pre>
+<p>Then, Calculate C from formula mentioned above.</p>
+<pre><code>%Example code: Camera center calculation
+C=-inv(Q)*m4;
+</code></pre>
+
+<h3>Part I: MATLAB Implementation Result</h3>
+
+<div style="float: middle; padding: 30px">
+<img src="Part1_Result.png"/>
+</div>
+<p>Compared to the provided answer, we got total residual=0.045.</p>
+<p>When plotted in a 2D position against the provided answer, the result is as follows:</p>
+<div style="float: middle; padding: 30px">
+<img src="P1_Result1.jpg" width="50%"/>
+</div>
+<p>When plotted in a 3D coordination against the provided answer, the result is as follows:</p>
+<div style="float: middle; padding: 30px">
+<img src="P1_Result2.jpg" width="50%"/>
+</div>
+
+
+<h3>Part II: Fundamental Matrix Estimation</h3>
+<p>&emsp;&emsp;In part II, we want to use our dual 2D pairs to estimate the fundamental matrix.</p>
+<p>From definition we have:</p>
+<div style="float: middle; padding: 30px">
+<img src="P2_F1.gif"/>
+</div>
+<p>After multiplication:</p>
+<div style="float: middle; padding: 30px">
+<img src="P2_F2.gif"/>
+</div>
+<p>After matrix expansion:</p>
+<div style="float: middle; padding: 30px">
+<img src="P2_F3.gif" width="50%"/>
+</div>
+<p>Use the same trick as Problem I, we assign the last item f33 to 1 and move it to the right hand side. Then we can use A\b to solve f.</p>
+<div style="float: middle; padding: 30px">
+<img src="P2_F4.png" width="40%"/>
+</div>
+
+<div style="float: middle; padding: 30px">
+<img src="P2_F5.png" width="40%"/>
+</div>
+
+<p>Because we know f is deficient with only rank 2, we can use SVD to decompose F into U,S and V and assign the smallest eigenvalue of S to 0 to reduce its rank to 2. After saving the reduced rank S and noted as S2, we can calculate our fundamental matrix by multiply U,S2 and V together.</p>
+
+<h2>Part II: Fundamental Matrix Example Code</h2>
+<p>First, we create matrix A by inserting 2D dual pairs and set f33=1 as Problem I.</p>
+<pre><code>
+for i=1:m_a
+	u1=Points_a(i,1);
+	v1=Points_a(i,2);
+	u2=Points_b(i,1);
+	v2=Points_b(i,2);
+	A(i,1)=u1*u2;
+	A(i,2)=v1*u2;
+	A(i,3)=u2;
+	A(i,4)=u1*v2;
+	A(i,5)=v1*v2;
+	A(i,6)=v2;
+	A(i,7)=u1;
+	A(i,8)=v1;
+end
+</code></pre>
+<p>Second, we calculate F by A\b.</p>
+<pre><code>F=A\b;
+F=[F;1];            % Insert f33=1 back
+F=reshape(F,3,3)';  % transpose after reshape
+</code></pre>
+<p>Third, using SVD method, we separate F into U,S and V. Then, we force the smallest eigenvalue of S to 0 to reduce F's rank and save it as S2. Finally, we calculate U,S2 and V' to get our optimal F.</p>
+<div style="float: middle; padding: 30px">
+<img src="P2_U.png" width="30%"/>
+</div>
+
+<div style="float: middle; padding: 30px">
+<img src="P2_S.png" width="30%"/>
+</div>
+
+<div style="float: middle; padding: 30px">
+<img src="P2_V.png" width="30%"/>
+</div>
+<pre><code>[U,S,V]=svd(F);
+Eigen_Values=sort(max(S,[],2),'descend');             %Sort eigenvalues and force the smallest to 0
+S2=[Eigen_Values(1) 0 0; 0 Eigen_Values(2) 0; 0 0 0]; %Restore S2
+F_matrix=U*S2*V';				    
+</code></pre>
+
+<div style="float: middle; padding: 30px">
+<img src="P2_F.png" width="30%"/>
+</div>
+
+<div style="float: middle; padding: 30px">
+<img src="P2_Figure1.jpg" width="50%"/>
+</div>
+
+<div style="float: middle; padding: 30px">
+<img src="P2_Figure2.jpg" width="50%"/>
+</div>
+<h3>Part IIB: Extra Credit Normalization</h3>
+<p>To improve the performance of fundamental matrix, we can normalize our dual pairs positions first. Specifically, by calculating each figures mean and standard deviation, we can generate the center of each figure. In this case, we use not merely the random sampled 8 points but the whole image's statistically characteristic. In other words, we can have some ability to against noise if any of our sampled 8 points have the great deviation.</p>
+<p>Based on the following formula:</p>
+<div style="float: middle; padding: 30px">
+<img src="Extra_F1.gif" width="30%"/>
+</div>
+
+<div style="float: middle; padding: 30px">
+<img src="Extra_F2.gif" width="20%"/>
+</div>
+<p>We can trasfer our original input 2D points to the normalized (sqrt(2)) positions.</p>
+<h3>Extra Points: Normalized Fundamental Matrix Example Code</h3>
+<pre><code>if normalization==1
+	C1=mean(Points_a);  %Mean of Figure 1
+	Cu1=C1(1,1);	    %Mean of Figure 1: u1
+	Cv1=C1(1,2);		%Mean of Figure 1: v1
+
+	C2=mean(Points_b); 	%Mean of Figure 2
+	Cu2=C2(1,1);		%Mean of Figure 2: u2
+	Cv2=C2(1,2);		%Mean of Figure 2: v2
+
+	dist1=0;
+	dist2=0;
+	for i= 1:m_a
+		dist1=dist1+(Points_a(i,1)-Cu1)^2+(Points_a(i,2)-Cv1)^2; $Mean Squared of C1
+		dist2=dist2+(Points_b(i,1)-Cu2)^2+(Points_b(i,2)-Cv2)^2; $Mean Squared of C2
+	end
+
+	avg_dist1=dist1/m_a; %RMS distance
+	avg_dist2=dist2/m_b; %m_a=m_b
+
+	%%%%%%%Normalize distance to sqrt(2)%%%%%%%
+	s1=sqrt(2/avg_dist1);
+	s2=sqrt(2/avg_dist2);
+
+	%%%%%%%Normalize distance to sqrt(2)%%%%%%%
+	Ta=[s1 0 0; 0 s1 0; 0 0 1] * [1 0 -Cu1; 0 1 -Cv1; 0 0 1];
+	Tb=[s2 0 0; 0 s2 0; 0 0 1] * [1 0 -Cu2; 0 1 -Cv2; 0 0 1];
+
+	%%%%%%%Points After Transfer%%%%%%%
+	for i=1:m_a
+		Points_a_T=transpose(Ta*[Points_a(i,1);Points_a(i,2);1]);
+		Points_a(i,:)=Points_a_T(1,1:2);
+
+		Points_b_T=transpose(Tb*[Points_b(i,1);Points_b(i,2);1]);
+		Points_b(i,:)=Points_b_T(1,1:2);
+	end
+end
+</code></pre>
+
+<p>And in the end, our Fundamental Matrix should be:</p>
+
+<pre><code>if normalization==1
+	F_temp=F_matrix;
+	F_matrix=Tb'*F_temp*Ta;
+end
+</code></pre>
+
+<h3>Part III: Fundamental Matrix with RANSAC</h3>
+<p>&emsp;&emsp;In part III, our goal is to use the fundamental matrix to reduce the computatoinal cost of RANSAC and improve its accuracy. We first select our # sample =8. From lecture notes, if the probability of at least one random sample is free from outlier is 0.99. The ratio of outlier e is 0.6. Then, we can calculate our iteration N should be log(1-p)/log(1-(1-e)^s), which is 7024. Then, we use MATLAB built-in function randperm to randomly sample 8 pairs from each 2D pairs. If the absolute error is less than thershold, we will record it. In the end, we compare the fundamental matrix with maximum pairs to match as our optimum and output.</p>
+
+<pre><code>% # of points used to cal. F
+s=8; %Choose 8 or 9 (from HW3 Website)
+% Threshold
+threshold=0.01; %Guess
+% Probability at least one random sample is free from outlier
+p=0.99;
+% outlier ratio
+e=0.6; %Guess
+
+N=log(1-p)/log(1-(1-e)^s); %7024
+
+No_Pairs=size(matches_a,1);
+
+no_best_correct_match=0;
+best_correct_match=[];
+Best_Fmatrix=zeros(3,3);
+
+for i=1:N
+	%Randomly select 8 pairs from A and B
+	sample=randperm(No_Pairs,8);
+	tmp_Fmatrix = estimate_fundamental_matrix(matches_a(sample,:), matches_b(sample,:));
+
+	correct_match=[];
+	
+	for j=1:No_Pairs
+		cal_error=[matches_b(j,1),matches_b(j,2),1]*tmp_Fmatrix*[matches_a(j,1);matches_a(j,2);1];
+		if abs(cal_error)<=threshold
+			correct_match=[correct_match;j];
+		end
+	end
+
+	if size(correct_match,1)>no_best_correct_match
+		Best_Fmatrix=tmp_Fmatrix;
+		best_correct_match=correct_match;
+		no_best_correct_match=size(correct_match,1);
+	end
+
+end
+
+inliers_a = matches_a(best_correct_match,:);
+inliers_b = matches_b(best_correct_match,:);
+
+end
+</code></pre>
+<h3>Part III: Fundamental Matrix with RANSAC Implementation Result</h3>
+<p>The following figures are MATLAB implementation results. This is the original RANSAC result without Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="Initial_Image.jpg" width="100%"/>
+</div>
+<p>This is the RANSAC result with Normalized Fundamental Matrix. This figure is the RANSAC result</p>
+<div style="float: middle; padding: 30px">
+<img src="vis_arrows.jpg" width="100%"/>
+</div>
+<p>Epipolar Lines:</p>
+<p>This is Figure 1 result of RANSAC with Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="Epipolar_1.jpg" width="100%"/>
+</div>
+<p>This is Figure 2 result of RANSAC with Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="Epipolar_2.jpg" width="100%"/>
+</div>
+<p>Epipolar Lines:</p>
+<p>This is Figure 1 result of RANSAC without Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="UN_Epipolar_1.jpg" width="100%"/>
+</div>
+<p>Epipolar Lines:</p>
+<p>This is Figure 2 result of RANSAC without Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="UN_Epipolar_2.jpg" width="100%"/>
+</div>
+<p>Normalized Notre Dame pair Results</p>
+<div style="float: middle; padding: 30px">
+<img src="Initial_Image_ND.jpg" width="100%"/>
+</div>
+<p>This is the Notre Dame pair RANSAC result with Normalized Fundamental Matrix. This figure is the RANSAC result</p>
+<div style="float: middle; padding: 30px">
+<img src="vis_arrows_ND.jpg" width="100%"/>
+</div>
+<p>Epipolar Lines:</p>
+<p>This is Notre Dame pair result of RANSAC with Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="Epipolar_1_ND.jpg" width="100%"/>
+</div>
+<p>This is Notre Dame pair result of RANSAC with Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="Epipolar_2_ND.jpg" width="100%"/>
+</div>
+
+<p>Un-Normalized Notre Dame pair Results</p>
+<p>This is the Notre Dame pair RANSAC result without Normalized Fundamental Matrix. This figure is the RANSAC result</p>
+<div style="float: middle; padding: 30px">
+<img src="UN_vis_arrows_ND.jpg" width="100%"/>
+</div>
+<p>Epipolar Lines:</p>
+<p>This is Notre Dame pair result of RANSAC without Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="UN_Epipolar_1_ND.jpg" width="100%"/>
+</div>
+<p>This is Notre Dame pair result of RANSAC without Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="UN_Epipolar_2_ND.jpg" width="100%"/>
+</div>
+
+<p>Normalized Gaudi pair Results</p>
+<div style="float: middle; padding: 30px">
+<img src="Initial_Image_Gaudi.jpg" width="100%"/>
+</div>
+<p>This is the Gaudi pair RANSAC result with Normalized Fundamental Matrix. This figure is the RANSAC result</p>
+<div style="float: middle; padding: 30px">
+<img src="vis_arrows_Gaudi.jpg" width="100%"/>
+</div>
+<p>Epipolar Lines:</p>
+<p>This is Gaudi pair result of RANSAC with Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="Epipolar_1_Gaudi.jpg" width="100%"/>
+</div>
+<p>This is Gaudi pair result of RANSAC with Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="Epipolar_2_Gaudi.jpg" width="100%"/>
+</div>
+
+<p>This is the Gaudi pair RANSAC result without Normalized Fundamental Matrix. This figure is the RANSAC result</p>
+<div style="float: middle; padding: 30px">
+<img src="UN_vis_arrows_Gaudi.jpg" width="100%"/>
+</div>
+<p>Epipolar Lines:</p>
+<p>This is Gaudi pair result of RANSAC without Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="UN_Epipolar_1_Gaudi.jpg" width="100%"/>
+</div>
+<p>This is Gaudi pair result of RANSAC without Normalized Fundamental Matrix.</p>
+<div style="float: middle; padding: 30px">
+<img src="UN_Epipolar_2_Gaudi.jpg" width="100%"/>
+</div>
+
+<h3>Part III Conclusion:</h3>
+<p>After evaluating datasets above, we can easily notice that the RANSAC with Normalized Fundamental Matrix have less outlier than the Un-Normalized Ones, especially in the Gaudi Pair. Although in some pairs they don't reveal a drametical improvement, Normalization of Fundamental Matrix could still slightly improve our matching accuracy.</p>
+
+</body>
+</html>
