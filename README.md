@@ -14,7 +14,7 @@ Project 2: Local Feature Matching
 Score: 100/100
 
 Page demo:
-http://htmlpreview.github.io/?https://github.com/cwu392/Computer-Vision/blob/master/Porject_2_Local_Feature_Matching/html/index.html
+http://htmlpreview.github.io/?https://github.com/cwu392/Computer-Vision/blob/master/Project_2_Local_Feature_Matching/html/index.html
 
 Project 3: Camera Calibration and Fundamental Matrix Estimation with RANSAC
 Score: 110/100
