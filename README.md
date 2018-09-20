@@ -1,8 +1,8 @@
 # Computer-Vision
 CS 6476 Computer Vision: written in MATLAB
 
-This is the deom pages from projects of CS 6476 Computer Vision
-The lecturer is James Hays at GaTech
+This is the demo webpages from projects of CS 6476 Computer Vision
+The lecturer is Prof. James Hays at GaTech
 
 Project 1: Image Filtering and Hybrid images
 Score: 107/100
